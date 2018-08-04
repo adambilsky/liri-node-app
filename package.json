@@ -20,7 +20,8 @@
   "dependencies": {
     "dotenv": "^6.0.0",
     "node-spotify-api": "^1.0.7",
-    "save": "^2.3.2"
+    "save": "^2.3.2",
+    "twitter": "^1.7.1"
   },
   "devDependencies": {}
 }

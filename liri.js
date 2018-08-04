@@ -1,80 +1,83 @@
+
+// Step 8
 require('dotenv').config();
 var fs = require("fs");
+var keysArr = [];
 
-// The following should satisfy instruction #9 = "access keys information"
-fs.readFile("keys.js", "utf8", function(error,data) {
-    if (error) {
-        return console.log(error);
-      }
-      var keysArr = data.split(",");
+// Step 9 = "access keys information"
+var keys = require("./keys.js")
 
-      // We will then print the contents of data
-      console.log(data);
-    //   console.log(keysArr);
-    
-});
-
-// var client = new Twitter(keys.twitter);
 var Spotify = require('node-spotify-api');
-var request = require("request"); 
-var spotify = new Spotify(
-    {
-  id: "c52b0418f12a41c881124f86c978ea5b",
-  secret: "eefd1f85179b465eab1ce4bad1aa3c94"
-  });
-  var spotifyQuery = "";
- 
+var Twitter = require("twitter");
+
+var spotify = new Spotify(keys.spotify);
+var client = new Twitter(keys.twitter);
+
+// console.log(spotify);
+// console.log(client);
 
 var command = process.argv[2];
+var term = process.argv.slice(3).join(" ");
 
 function myTweets() {
 
 }
 
-function spotifyThis () {
-    spotify.search({ 
-        type: 'track', 
-        query: spotifyQuery 
-    }, 
-        function(err, data) {
-          if (err) {
-            return console.log('Error occurred: ' + err);
-          }
-          console.log(data); 
+function spotifyThis() {
+    spotifyQuery = process.argv[3]
+    spotify.search({
+        type: 'track',
+        query: term
+    },
+        function (err, data) {
+            if (err) {
+                return console.log('Error occurred: ' + err);
+            }
+            // console.log(JSON.stringify(data, null, 2));
+            console.log("Song name: ", spotifyQuery);
+            console.log("Artist: ", data.tracks.items[3].artists[0].name);
+            console.log("Link: ", data.tracks.items[3].preview_url);
+            console.log("Album: ", data.tracks.items[3].name);
+
         });
-    
+
 }
 
-function movieThis () {
+function movieThis() {
 
 }
 
 function doWhatItSays() {
-    fs.readFile("random.txt", "utf8", function(error, data) {
+    fs.readFile("random.txt", "utf8", function (error, data) {
 
         // If the code experiences any errors it will log the error to the console.
         if (error) {
-          return console.log(error);
+            return console.log(error);
         }
         console.log(data);
-        // spotifyQuery = data;
+        var dataArr = data.split(",");
+        spotifyQuery = dataArr[1];
         spotifyThis();
     })
 }
-if (command === "my-tweets") {
 
-}
-else if(command === "spotify-this-song") {
+switch (command) {
+    case "my-tweets":
+        myTweets();
+        break;
 
-}
-else if(command === "movie-this") {
-    // must parse the below command out with specifics and process.argv 
-    // request("http://www.omdbapi.com/?t=remember+the+titans&y=&plot=short&apikey=trilogy", function(error, response, body) {
+    case "spotify-this-song":
+        spotifyThis();
+        break;
 
-}
-else if(command === "do-what-it-says") {
-    doWhatItSays();
-}
-else {
-    console.log("Please enter a valid command.")
+    case "movie-this":
+        movieThis();
+        break;
+
+    case "do-what-it-says":
+        doWhatItSays();
+        break;
+
+    default:
+        console.log("Please enter a valid command.")
 }
