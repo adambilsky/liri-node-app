@@ -2,7 +2,6 @@ var request = require("request");
 // Step 8
 require('dotenv').config();
 var fs = require("fs");
-var keysArr = [];
 
 // Step 9 = "access keys information"
 var keys = require("./keys.js")
@@ -20,14 +19,39 @@ var command = process.argv[2];
 var term = process.argv.slice(3).join(" ");
 
 function myTweets() {
-    var params = { screen_name: 'boot_sky' };
+    if(term === ""){
+        term = "boot_sky";
+    }
+    var params = { screen_name: term };
     client.get('statuses/user_timeline', params, function (error, tweets, response) {
         if (!error) {
-            console.log(tweets);
+            // console.log(tweets);
+            // console.log(response);
+            var tweetNum = tweets.length;
+            var separator = "-----------";
+            if (tweetNum < 20) {
+                for (i = 0; i < tweetNum; i++) {
+                    var showTweet = [
+                        separator,
+                        "Date: " + tweets[i].created_at,
+                        "Text: " + tweets[i].text
+                    ].join("\n");
+                    console.log(showTweet);
+                }
+            }
+            else {
+                for (i = 0; i < 20; i++) {
+                    var showTweet = [
+                        separator,
+                        "Date: " + tweets[i].created_at,
+                        "Text: " + tweets[i].text
+                    ].join("\n");
+                    console.log(showTweet);
+                }
+            };
         }
-        // need to parse tweets to get JUST text
     });
-}
+};
 
 function spotifyThis() {
     spotify.search({
@@ -39,6 +63,7 @@ function spotifyThis() {
                 return console.log('Error occurred: ' + err);
             }
             // console.log(JSON.stringify(data, null, 2));
+            // tv search app from saturday 8/4
             console.log("Song name: ", term);
             console.log("Artist: ", data.tracks.items[3].artists[0].name);
             console.log("Link: ", data.tracks.items[3].preview_url);
@@ -54,7 +79,23 @@ function movieThis() {
 
         // If the request is successful (i.e. if the response status code is 200)
         if (!error && response.statusCode === 200) {
-            console.log(body);
+            // console.log(body);
+            var jsonData = JSON.parse(body);
+            var showData = [
+                "Title: " + jsonData.Title,
+                "Release Year: " + jsonData.Year,
+                "IMDB Rating: " + jsonData.Ratings[0].Value,
+                "Rotten Tomatoes Rating: " + jsonData.Ratings[1].Value,
+                "Country: " + jsonData.Country,
+                "Language: " + jsonData.Languages,
+                "Plot Summary: " + jsonData.Plot,
+                "Cast: " + jsonData.Actors
+            ].join("\n\n");
+            console.log(showData);
+            // console.log(jsonData);
+        }
+        else {
+            console.log("We're sorry, please try with a different title.")
         }
     })
 }
