@@ -5,18 +5,17 @@ var fs = require("fs");
 
 // Step 9 = "access keys information"
 var keys = require("./keys.js")
-
 var Spotify = require('node-spotify-api');
 var Twitter = require("twitter");
-
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
 
-// console.log(spotify);
-// console.log(client);
-
+// take in the command
 var command = process.argv[2];
 var term = process.argv.slice(3).join(" ");
+var separator = "-----------";
+
+console.log(term);
 
 function myTweets() {
     if(term === ""){
@@ -28,27 +27,38 @@ function myTweets() {
             // console.log(tweets);
             // console.log(response);
             var tweetNum = tweets.length;
-            var separator = "-----------";
+            var showTweet = []
+
             if (tweetNum < 20) {
                 for (i = 0; i < tweetNum; i++) {
-                    var showTweet = [
-                        separator,
+                    showTweet.push(
                         "Date: " + tweets[i].created_at,
                         "Text: " + tweets[i].text
-                    ].join("\n");
-                    console.log(showTweet);
+                    );
+                    // console.log(showTweet);
                 }
             }
             else {
                 for (i = 0; i < 20; i++) {
-                    var showTweet = [
-                        separator,
+                    showTweet.push(
                         "Date: " + tweets[i].created_at,
                         "Text: " + tweets[i].text
-                    ].join("\n");
-                    console.log(showTweet);
+                    );
+                    // console.log(showTweet);
                 }
             };
+            console.log(command + " " + term + "\n" + separator);
+            fs.appendFile("log.txt", command + " " + term + "\n" + separator, function (err) {
+                if (err) throw err;
+              });
+            for (a = 0; a < showTweet.length; a++){
+                console.log(showTweet[a] + "\n")
+                fs.appendFile("log.txt", showTweet[a] + "\n", function (err) {
+                    if (err) throw err;
+                  });
+    
+            }
+
         }
     });
 };
@@ -62,12 +72,18 @@ function spotifyThis() {
             if (err) {
                 return console.log('Error occurred: ' + err);
             }
-            // console.log(JSON.stringify(data, null, 2));
-            // tv search app from saturday 8/4
-            console.log("Song name: ", term);
-            console.log("Artist: ", data.tracks.items[3].artists[0].name);
-            console.log("Link: ", data.tracks.items[3].preview_url);
-            console.log("Album: ", data.tracks.items[3].name);
+            var returnItem = data.tracks.items[3];
+            var showSong = [
+                separator,
+                "Song name: " + term,
+                "Artist: " + returnItem.artists[0].name,
+                "Link: " + returnItem.preview_url,
+                "Album: " + returnItem.name
+            ].join("\n");
+            console.log(showSong);
+            fs.appendFile("log.txt", "\n" + command + " " + term + "\n" + separator + showSong, function (err) {
+                if (err) throw err;
+              });
 
         });
 
@@ -75,6 +91,9 @@ function spotifyThis() {
 
 function movieThis() {
     var request = require("request");
+    if (term === ""){
+        term = "Mr.+Nobody";
+    }
     request("http://www.omdbapi.com/?t=" + term + "&apikey=trilogy", function (error, response, body) {
 
         // If the request is successful (i.e. if the response status code is 200)
@@ -82,6 +101,7 @@ function movieThis() {
             // console.log(body);
             var jsonData = JSON.parse(body);
             var showData = [
+                separator,
                 "Title: " + jsonData.Title,
                 "Release Year: " + jsonData.Year,
                 "IMDB Rating: " + jsonData.Ratings[0].Value,
@@ -92,6 +112,10 @@ function movieThis() {
                 "Cast: " + jsonData.Actors
             ].join("\n\n");
             console.log(showData);
+            fs.appendFile("log.txt", separator + "\n" + command + " " + term + "\n" + showData + "\n", function (err) {
+                if (err) throw err;
+              });
+
             // console.log(jsonData);
         }
         else {
